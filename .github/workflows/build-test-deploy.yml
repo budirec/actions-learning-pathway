@@ -6,10 +6,10 @@ jobs:
     steps: 
       - name: Check out repository code
         uses: actions/checkout@v3
-      - name: Use Bun v1
+      - name: Use bun v1
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: latestbun-version: latest
       - run: bun install
       - run: bun run build 
   test: 
@@ -18,9 +18,44 @@ jobs:
     steps: 
       - name: checkout repo
         uses: actions/checkout@v3
-      - name: Use Bun v1
+      - name: Use bun v1
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
       - run: bun install
       - run: bun test
+  deploy:
+    needs: test
+    permissions:
+      deployments: write
+      contents: write
+      statuses: write
+      actions: write
+      pages: write     
+      id-token: write  
+    environment:
+      name: production
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: use bun v1
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
+      - run: bun run build      
+      - name: configure github pages
+        uses: actions/configure-pages@v3
+        with:
+          static_site_generator: next
+      - name: upload artifacts
+        uses: actions/upload-pages-artifact@v1
+        with: 
+          path: "./out"
+      - name: deploy
+        id: deployment
+        uses: actions/deploy-pages@v1
