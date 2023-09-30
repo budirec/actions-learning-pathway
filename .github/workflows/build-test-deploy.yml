@@ -1,13 +1,26 @@
 name: build-test-deploy
 on: push
 jobs: 
-  build-test-deploy-job:
+  build:
     runs-on: ubuntu-latest
     steps: 
       - name: Check out repository code
         uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
+      - name: Use Bun v1
+        uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
       - run: bun install
       - run: bun run build 
+  test: 
+    needs: build
+    runs-on: ubuntu-latest
+    steps: 
+      - name: checkout repo
+        uses: actions/checkout@v3
+      - name: Use Bun v1
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
+      - run: bun test
